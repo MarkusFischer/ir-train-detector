@@ -1,0 +1,3 @@
+[submodule "firmware/msp430hal"]
+	path = firmware/msp430hal
+	url = https://github.com/MarkusFischer/msp430hal
