@@ -7,22 +7,28 @@
 int main()
 {
     WDTCTL = WDTPW | WDTHOLD;
-    
-    typedef msp430hal::gpio::GPIOPin<msp430hal::gpio::Port::port_2, msp430hal::gpio::Pin::p_1, msp430hal::gpio::Mode::output> module1_status;
-    typedef msp430hal::gpio::GPIOPin<msp430hal::gpio::Port::port_2, msp430hal::gpio::Pin::p_0, msp430hal::gpio::Mode::output> module2_status;
-    typedef msp430hal::gpio::GPIOPin<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_0, msp430hal::gpio::Mode::output> module3_status;
-    typedef msp430hal::gpio::GPIOPin<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_1, msp430hal::gpio::Mode::output> module4_status;
-    typedef msp430hal::gpio::GPIOPin<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_6, msp430hal::gpio::Mode::output> module5_status;
-    typedef msp430hal::gpio::GPIOPin<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_7, msp430hal::gpio::Mode::output> module6_status;
 
-    typedef msp430hal::gpio::GPIOPin<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_5, msp430hal::gpio::Mode::output> gp_led;
+    using msp430hal::gpio::Pin;
 
-    module1_status::init();
-    module2_status::init();
-    module3_status::init();
-    module4_status::init();
-    module5_status::init();
-    module6_status::init();
+    typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_2, msp430hal::gpio::Pin::p_1, msp430hal::gpio::Mode::output> module1_status;
+    typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_2, msp430hal::gpio::Pin::p_0, msp430hal::gpio::Mode::output> module2_status;
+    typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_0, msp430hal::gpio::Mode::output> module3_status;
+    typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_1, msp430hal::gpio::Mode::output> module4_status;
+    typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_6, msp430hal::gpio::Mode::output> module5_status;
+    typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_7, msp430hal::gpio::Mode::output> module6_status;
+
+    typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_5, msp430hal::gpio::Mode::output> gp_led;
+
+    msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_2, msp430hal::gpio::Pin::p_0 + msp430hal::gpio::Pin::p_1>::init();
+    msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_0 + msp430hal::gpio::Pin::p_1 + msp430hal::gpio::Pin::p_6 + msp430hal::gpio::Pin::p_7>::init();
+
+    typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_2, Pin::p_2 + Pin::p_3 + Pin::p_4 + Pin::p_5> output_p2;
+    output_p2::init();
+    output_p2::set();
+
+    typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, Pin::p_2 + Pin::p_3> output_p3;
+    output_p3::init();
+    output_p3::set();
 
     gp_led::init();
 
