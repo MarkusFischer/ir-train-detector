@@ -2,44 +2,54 @@
 // Created by markus on 2/6/23.
 //
 #include <msp430.h>
-#include <gpio/pin.h>
+#include <cpu/clock_module.h>
+#include <timer/hwtimer.h>
+#include <timer/watchdog_timer.h>
+//#include <gpio/pin.h>
 
 int main()
 {
-    WDTCTL = WDTPW | WDTHOLD;
 
-    using msp430hal::gpio::Pin;
+    msp430hal::timer::stopWatchdog();
 
-    typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_2, msp430hal::gpio::Pin::p_1, msp430hal::gpio::Mode::output> module1_status;
-    typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_2, msp430hal::gpio::Pin::p_0, msp430hal::gpio::Mode::output> module2_status;
-    typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_0, msp430hal::gpio::Mode::output> module3_status;
-    typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_1, msp430hal::gpio::Mode::output> module4_status;
-    typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_6, msp430hal::gpio::Mode::output> module5_status;
-    typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_7, msp430hal::gpio::Mode::output> module6_status;
+    //TODO: validate calibration data
+    msp430hal::cpu::setCalibratedFrequency<msp430hal::cpu::CalibratedDCOFrequency::calibrated_8MHz>();
+    msp430hal::cpu::setInputDivider<msp430hal::cpu::Clock::aclk>(msp430hal::cpu::Divider::times_1);
+    msp430hal::cpu::setLowFrequencySource(msp430hal::cpu::LowFrequencySource::watch_crystal);
+    msp430hal::cpu::selectOscillatorCapacitor(msp430hal::cpu::OscillatorCapacitor::approx_6pF);
+    msp430hal::cpu::selectClockSource<msp430hal::cpu::Clock::smclk>(msp430hal::cpu::ClockSource::dcoclk);
+    msp430hal::cpu::setInputDivider<msp430hal::cpu::Clock::smclk>(msp430hal::cpu::Divider::times_8);
 
-    typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_5, msp430hal::gpio::Mode::output> gp_led;
+    //using pin = msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_2, 0x08>;
+    //pin::init();
 
-    msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_2, msp430hal::gpio::Pin::p_0 + msp430hal::gpio::Pin::p_1>::init();
-    msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_0 + msp430hal::gpio::Pin::p_1 + msp430hal::gpio::Pin::p_6 + msp430hal::gpio::Pin::p_7>::init();
+    P2DIR |= BIT3 + BIT1;
+    /*P2SEL &= ~BIT3;
+    P2SEL2 &= ~BIT3;*/
+    P2SEL |= BIT1;
 
-    typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_2, Pin::p_2 + Pin::p_3 + Pin::p_4 + Pin::p_5> output_p2;
-    output_p2::init();
-    output_p2::set();
+    P2OUT &= ~BIT3;
 
-    typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, Pin::p_2 + Pin::p_3> output_p3;
-    output_p3::init();
-    output_p3::set();
+    using ir_module_timer = msp430hal::timer::Timer_t<msp430hal::timer::TimerModule::timer_a, 1>;
 
-    gp_led::init();
+    ir_module_timer::init(msp430hal::timer::TimerMode::up, msp430hal::timer::TimerClockSource::smclk, msp430hal::timer::TimerClockInputDivider::times_1);
+    ir_module_timer::setCompareValue<0>(100);
+    ir_module_timer::enableCaptureCompareInterrupt<0>();
+    ir_module_timer::setCompareValue<1>(50);
+    ir_module_timer::enableCaptureCompareInterrupt<1>();
+    ir_module_timer::reset();
 
-    module1_status::set();
-    module2_status::set();
-    module3_status::set();
-    module4_status::set();
-    module5_status::set();
-    module6_status::set();
+    //configure timer
+    //using timer = msp430hal::timer::Timer_t<msp430hal::timer::TimerModule::timer_a, 0>;
+    //timer::init(msp430hal::timer::TimerMode::continuous, msp430hal::timer::TimerClockSource::smclk, msp430hal::timer::TimerClockInputDivider::times_1);
+    //timer::selectCaptureCompareInput<0>(msp430hal::timer::CaptureCompareInputSelect::gnd);
+    //timer::setCaptureMode<0>(msp430hal::timer::TimerCaptureMode::rising_edge);
 
-    gp_led::set();
-    for(;;);
+    __enable_interrupt();
+
+    uint32_t expected = 70001;
+    for(;;)
+    {
+    }
     return 0;
 }
