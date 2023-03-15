@@ -12,8 +12,8 @@ _isr_handle_ta1iv: .asmfunc                  ; Acceptance of ISR: 6 Cycles
 timer_overflow:
     RETI                            ; Return from ISR 5 Cylces TOTAL: 14
 ccifg_1_handling:
-    BIS.B #0x08, &P2OUT             ;
-    RETI                            ; Return from ISR 5 Cylces TOTAL: 16
+    BIS.B #0x08, &P2OUT             ; 5 Cycles
+    RETI                            ; Return from ISR 5 Cylces TOTAL: 21
 ccifg_2_handling:
     RETI                            ; Return from ISR 5 Cylces TOTAL: 16
     .endasmfunc

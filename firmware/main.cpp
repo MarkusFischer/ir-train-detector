@@ -5,6 +5,7 @@
 #include <cpu/clock_module.h>
 #include <timer/hwtimer.h>
 #include <timer/watchdog_timer.h>
+#include <peripherals/comparator.h>
 //#include <gpio/pin.h>
 
 int main()
@@ -29,6 +30,11 @@ int main()
     P2SEL |= BIT1;
 
     P2OUT &= ~BIT3;
+    //P2OUT |= BIT3;
+
+    P1DIR |= BIT3;
+    P1SEL |= BIT3;
+    P1SEL2 |= BIT3;
 
     using ir_module_timer = msp430hal::timer::Timer_t<msp430hal::timer::TimerModule::timer_a, 1>;
 
@@ -38,6 +44,13 @@ int main()
     ir_module_timer::setCompareValue<1>(50);
     ir_module_timer::enableCaptureCompareInterrupt<1>();
     ir_module_timer::reset();
+
+    msp430hal::peripherals::Comparator comparator;
+
+    comparator.setInvertingInput(msp430hal::peripherals::ComparatorInput::vcc_025);
+    comparator.setNonInvertingInput(msp430hal::peripherals::ComparatorInput::ca_5);
+    comparator.enableOutputFilter();
+    comparator.enable();
 
     //configure timer
     //using timer = msp430hal::timer::Timer_t<msp430hal::timer::TimerModule::timer_a, 0>;
