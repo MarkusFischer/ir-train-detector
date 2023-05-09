@@ -11,6 +11,7 @@
 
 #include "interrupts.h"
 #include "flags.h"
+#include "StatusLEDManager.h"
 
 volatile std::uint_fast8_t g_comparator_counter = 0;
 volatile bool g_comparator_capture_cycle_finished = false;
@@ -18,6 +19,11 @@ volatile bool g_comparator_capture_cycle_finished = false;
 typedef msp430hal::timer::Timer_t<msp430hal::timer::TimerModule::timer_a, 1> ir_module_timer;
 typedef msp430hal::timer::Timer_t<msp430hal::timer::TimerModule::timer_a, 0> timer_1mhz;
 typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_2, msp430hal::gpio::Pin::p_0> module_1_status;
+typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_0> module_2_status;
+typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_1> module_3_status;
+typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_2, msp430hal::gpio::Pin::p_3> module_4_status;
+typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_6> module_5_status;
+typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_7> module_6_status;
 typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_4, msp430hal::gpio::Mode::input, msp430hal::gpio::PinResistors::external_pullup> button;
 
 
@@ -36,6 +42,11 @@ int main()
 
 
     module_1_status::init();
+    module_2_status::init();
+    module_3_status::init();
+    module_4_status::init();
+    module_5_status::init();
+    module_6_status::init();
     button::init();
 
 
@@ -72,18 +83,32 @@ int main()
     comparator.enableInterrupt();
     comparator.enable();
 
+    StatusLEDManager<6> status_leds;
+    status_leds.bindLED(0, module_1_status::pins_value, module_1_status::out);
+    status_leds.bindLED(1, module_2_status::pins_value, module_2_status::out);
+    status_leds.bindLED(2, module_3_status::pins_value, module_3_status::out);
+    status_leds.bindLED(3, module_4_status::pins_value, module_4_status::out);
+    status_leds.bindLED(4, module_5_status::pins_value, module_5_status::out);
+    status_leds.bindLED(5, module_6_status::pins_value, module_6_status::out);
+
+
     __enable_interrupt();
 
+    bool temp;
     for(;;)
     {
+        temp = !temp;
+        //status_leds.setBit(1, temp);
         if (g_comparator_capture_cycle_finished)
         {
             //Set status led if measured frequency is around 1kHz (+- 5%)
             std::uint16_t capture_value = timer_1mhz::getCaptureValue<1>();
-            if (capture_value >= 950 && capture_value <= 1050)
-                module_1_status::set();
+            if (capture_value >= 900 && capture_value <= 1100)
+                status_leds.setBit(0, true);
+                //module_1_status::set();
             else
-                module_1_status::clear();
+                status_leds.setBit(0, false);
+                //module_1_status::clear();
 
 
             //reset counter
@@ -92,6 +117,8 @@ int main()
             timer_1mhz::selectCaptureCompareInput<1>(msp430hal::timer::CaptureCompareInputSelect::gnd);
             timer_1mhz::reset();
         }
+
+        status_leds.updateLEDs();
     }
     return 0;
 }
