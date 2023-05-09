@@ -2,11 +2,11 @@
 // Created by markus on 2/6/23.
 //
 #include <msp430.h>
-#include <cpu/clock_module.h>
-#include <timer/hwtimer.h>
-#include <timer/watchdog_timer.h>
-#include <peripherals/comparator.h>
-#include <gpio/pin.h>
+#include <msp430hal/cpu/clock_module.h>
+#include <msp430hal/timer/hwtimer.h>
+#include <msp430hal/timer/watchdog_timer.h>
+#include <msp430hal/peripherals/comparator.h>
+#include <msp430hal/gpio/pin.h>
 //#include <usci/usci.h>
 
 #include "interrupts.h"

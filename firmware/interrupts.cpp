@@ -1,7 +1,7 @@
 #include "interrupts.h"
 
-#include <gpio/pin.h>
-#include <timer/hwtimer.h>
+#include <msp430hal/gpio/pin.h>
+#include <msp430hal/timer/hwtimer.h>
 #include "flags.h"
 
 
