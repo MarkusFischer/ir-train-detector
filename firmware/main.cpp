@@ -38,17 +38,13 @@ int main()
     module_1_status::init();
     button::init();
 
-    //using pin = msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, 0x08>;
-    //pin::init();
-    //pin::enableInterrupt();
 
+
+    //TODO: Replace with more readable gpio methods
     P2DIR |= BIT3 + BIT1;
-    /*P2SEL &= ~BIT3;
-    P2SEL2 &= ~BIT3;*/
     P2SEL |= BIT1;
 
     P2OUT &= ~BIT3;
-    //P2OUT |= BIT3;
 
     P1DIR |= BIT3;
     P1SEL |= BIT3;
@@ -67,8 +63,6 @@ int main()
     timer_1mhz::setCaptureMode<1>(msp430hal::timer::TimerCaptureMode::rising_edge);
     timer_1mhz::selectCaptureCompareInput<1>(msp430hal::timer::CaptureCompareInputSelect::gnd);
     timer_1mhz::enableCaptureCompareInterrupt<1>();
-    //timer_1mhz::enableInterrupt();
-    //Performing capture by writing setting capture compare input 1 to vcc
 
     msp430hal::peripherals::Comparator comparator;
 
@@ -78,12 +72,8 @@ int main()
     comparator.enableInterrupt();
     comparator.enable();
 
-
-
     __enable_interrupt();
 
-    uint32_t expected = 50;
-    uint32_t i = 0;
     for(;;)
     {
         if (g_comparator_capture_cycle_finished)
@@ -102,14 +92,6 @@ int main()
             timer_1mhz::selectCaptureCompareInput<1>(msp430hal::timer::CaptureCompareInputSelect::gnd);
             timer_1mhz::reset();
         }
-
-        /*if (i >= expected)
-        {
-
-            timer_1mhz::selectCaptureCompareInput<1>(msp430hal::timer::CaptureCompareInputSelect::vcc);
-            i = 0;
-        }*/
-        ++i;
     }
     return 0;
 }
