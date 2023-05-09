@@ -6,7 +6,20 @@
 #include <timer/hwtimer.h>
 #include <timer/watchdog_timer.h>
 #include <peripherals/comparator.h>
-//#include <gpio/pin.h>
+#include <gpio/pin.h>
+//#include <usci/usci.h>
+
+#include "interrupts.h"
+#include "flags.h"
+
+volatile std::uint_fast8_t g_comparator_counter = 0;
+volatile bool g_comparator_capture_cycle_finished = false;
+
+typedef msp430hal::timer::Timer_t<msp430hal::timer::TimerModule::timer_a, 1> ir_module_timer;
+typedef msp430hal::timer::Timer_t<msp430hal::timer::TimerModule::timer_a, 0> timer_1mhz;
+typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_2, msp430hal::gpio::Pin::p_0> module_1_status;
+typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_4, msp430hal::gpio::Mode::input, msp430hal::gpio::PinResistors::external_pullup> button;
+
 
 int main()
 {
@@ -21,8 +34,13 @@ int main()
     msp430hal::cpu::selectClockSource<msp430hal::cpu::Clock::smclk>(msp430hal::cpu::ClockSource::dcoclk);
     msp430hal::cpu::setInputDivider<msp430hal::cpu::Clock::smclk>(msp430hal::cpu::Divider::times_8);
 
-    //using pin = msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_2, 0x08>;
+
+    module_1_status::init();
+    button::init();
+
+    //using pin = msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, 0x08>;
     //pin::init();
+    //pin::enableInterrupt();
 
     P2DIR |= BIT3 + BIT1;
     /*P2SEL &= ~BIT3;
@@ -36,33 +54,62 @@ int main()
     P1SEL |= BIT3;
     P1SEL2 |= BIT3;
 
-    using ir_module_timer = msp430hal::timer::Timer_t<msp430hal::timer::TimerModule::timer_a, 1>;
-
     ir_module_timer::init(msp430hal::timer::TimerMode::up, msp430hal::timer::TimerClockSource::smclk, msp430hal::timer::TimerClockInputDivider::times_1);
     ir_module_timer::setCompareValue<0>(100);
-    ir_module_timer::enableCaptureCompareInterrupt<0>();
     ir_module_timer::setCompareValue<1>(50);
-    ir_module_timer::enableCaptureCompareInterrupt<1>();
+    ir_module_timer::setCompareValue<2>(50);
+    ir_module_timer::setOutputMode<1>(msp430hal::timer::TimerOutputMode::set_reset);
+    ir_module_timer::setOutputMode<2>(msp430hal::timer::TimerOutputMode::reset_set);
     ir_module_timer::reset();
+
+    timer_1mhz::init(msp430hal::timer::TimerMode::continuous, msp430hal::timer::TimerClockSource::smclk, msp430hal::timer::TimerClockInputDivider::times_1);
+    timer_1mhz::captureMode<1>();
+    timer_1mhz::setCaptureMode<1>(msp430hal::timer::TimerCaptureMode::rising_edge);
+    timer_1mhz::selectCaptureCompareInput<1>(msp430hal::timer::CaptureCompareInputSelect::gnd);
+    timer_1mhz::enableCaptureCompareInterrupt<1>();
+    //timer_1mhz::enableInterrupt();
+    //Performing capture by writing setting capture compare input 1 to vcc
 
     msp430hal::peripherals::Comparator comparator;
 
-    comparator.setInvertingInput(msp430hal::peripherals::ComparatorInput::vcc_025);
-    comparator.setNonInvertingInput(msp430hal::peripherals::ComparatorInput::ca_5);
+    comparator.setNonInvertingInput(msp430hal::peripherals::ComparatorInput::vcc_025);
+    comparator.setInvertingInput(msp430hal::peripherals::ComparatorInput::ca_5);
     comparator.enableOutputFilter();
+    comparator.enableInterrupt();
     comparator.enable();
 
-    //configure timer
-    //using timer = msp430hal::timer::Timer_t<msp430hal::timer::TimerModule::timer_a, 0>;
-    //timer::init(msp430hal::timer::TimerMode::continuous, msp430hal::timer::TimerClockSource::smclk, msp430hal::timer::TimerClockInputDivider::times_1);
-    //timer::selectCaptureCompareInput<0>(msp430hal::timer::CaptureCompareInputSelect::gnd);
-    //timer::setCaptureMode<0>(msp430hal::timer::TimerCaptureMode::rising_edge);
+
 
     __enable_interrupt();
 
-    uint32_t expected = 70001;
+    uint32_t expected = 50;
+    uint32_t i = 0;
     for(;;)
     {
+        if (g_comparator_capture_cycle_finished)
+        {
+            //Set status led if measured frequency is around 1kHz (+- 5%)
+            std::uint16_t capture_value = timer_1mhz::getCaptureValue<1>();
+            if (capture_value >= 950 && capture_value <= 1050)
+                module_1_status::set();
+            else
+                module_1_status::clear();
+
+
+            //reset counter
+            g_comparator_counter = 0;
+            g_comparator_capture_cycle_finished = false;
+            timer_1mhz::selectCaptureCompareInput<1>(msp430hal::timer::CaptureCompareInputSelect::gnd);
+            timer_1mhz::reset();
+        }
+
+        /*if (i >= expected)
+        {
+
+            timer_1mhz::selectCaptureCompareInput<1>(msp430hal::timer::CaptureCompareInputSelect::vcc);
+            i = 0;
+        }*/
+        ++i;
     }
     return 0;
 }
