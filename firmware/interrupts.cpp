@@ -21,3 +21,8 @@ void handleComparatorInterrupt()
     if (g_comparator_counter >= 10)
         msp430hal::timer::Timer_t<msp430hal::timer::timer_a, 0>::selectCaptureCompareInput<1>(msp430hal::timer::CaptureCompareInputSelect::vcc);
 }
+
+void handleUSCIRXInterrupt()
+{
+    g_uart_message_to_handle = true;
+}

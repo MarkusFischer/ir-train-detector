@@ -7,7 +7,7 @@
 #include <msp430hal/timer/watchdog_timer.h>
 #include <msp430hal/peripherals/comparator.h>
 #include <msp430hal/gpio/pin.h>
-//#include <usci/usci.h>
+#include <msp430hal/usci/uart.h>
 
 #include "interrupts.h"
 #include "flags.h"
@@ -15,6 +15,7 @@
 
 volatile std::uint_fast8_t g_comparator_counter = 0;
 volatile bool g_comparator_capture_cycle_finished = false;
+volatile bool g_uart_message_to_handle = false;
 
 typedef msp430hal::timer::Timer_t<msp430hal::timer::TimerModule::timer_a, 1> ir_module_timer;
 typedef msp430hal::timer::Timer_t<msp430hal::timer::TimerModule::timer_a, 0> timer_1mhz;
@@ -24,8 +25,9 @@ typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, msp430hal::gpio
 typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_2, msp430hal::gpio::Pin::p_3> module_4_status;
 typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_6> module_5_status;
 typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_7> module_6_status;
+typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_5> gp_led;
 typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_4, msp430hal::gpio::Mode::input, msp430hal::gpio::PinResistors::external_pullup> button;
-
+typedef msp430hal::usci::UART_t<0, 9600, 32768, msp430hal::usci::UARTClockSource::aclk> uart;
 
 int main()
 {
@@ -47,9 +49,13 @@ int main()
     module_4_status::init();
     module_5_status::init();
     module_6_status::init();
+
+    gp_led::init();
+    gp_led::clear();
     button::init();
 
-
+    uart::init();
+    uart::Usci::enableRxInterrupt();
 
     //TODO: Replace with more readable gpio methods
     P2DIR |= BIT3 + BIT1;
@@ -58,8 +64,8 @@ int main()
     P2OUT &= ~BIT3;
 
     P1DIR |= BIT3;
-    P1SEL |= BIT3;
-    P1SEL2 |= BIT3;
+    P1SEL |= BIT3 + BIT2 + BIT1;
+    P1SEL2 |= BIT3 + BIT2 + BIT1;
 
     ir_module_timer::init(msp430hal::timer::TimerMode::up, msp430hal::timer::TimerClockSource::smclk, msp430hal::timer::TimerClockInputDivider::times_1);
     ir_module_timer::setCompareValue<0>(100);
@@ -91,14 +97,12 @@ int main()
     status_leds.bindLED(4, module_5_status::pins_value, module_5_status::out);
     status_leds.bindLED(5, module_6_status::pins_value, module_6_status::out);
 
+    uart::enable();
 
     __enable_interrupt();
 
-    bool temp;
     for(;;)
     {
-        temp = !temp;
-        //status_leds.setBit(1, temp);
         if (g_comparator_capture_cycle_finished)
         {
             //Set status led if measured frequency is around 1kHz (+- 5%)
@@ -116,6 +120,18 @@ int main()
             g_comparator_capture_cycle_finished = false;
             timer_1mhz::selectCaptureCompareInput<1>(msp430hal::timer::CaptureCompareInputSelect::gnd);
             timer_1mhz::reset();
+        }
+
+        if (g_uart_message_to_handle)
+        {
+            module_2_status::toggle();
+            char message = *uart::Usci::rx_buf;
+            if (message == 'a')
+                gp_led::set();
+            else
+                gp_led::clear();
+
+            g_uart_message_to_handle = false;
         }
 
         status_leds.updateLEDs();
