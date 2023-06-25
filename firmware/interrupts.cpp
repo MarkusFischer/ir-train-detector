@@ -5,6 +5,8 @@
 #include "flags.h"
 
 
+typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_5> gp_led;
+
 void handleTimer0A1Interrupts()
 {
     typedef msp430hal::timer::Timer_t<msp430hal::timer::timer_a, 0> timer;
@@ -24,5 +26,7 @@ void handleComparatorInterrupt()
 
 void handleUSCIRXInterrupt()
 {
+    while (!(IFG2 & UCA0TXIFG));
+    UCA0TXBUF = UCA0RXBUF;
     g_uart_message_to_handle = true;
 }

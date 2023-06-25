@@ -55,7 +55,14 @@ int main()
     button::init();
 
     uart::init();
-    uart::Usci::enableRxInterrupt();
+    //UCA0CTL1 |= UCSWRST;
+    //UCA0CTL1 = UCSSEL_1 | UCSWRST;
+
+    //UCA0BR0 = 3;
+    //UCA0MCTL = 56;
+    //IE2 |= UCA0RXIE;
+
+
 
     //TODO: Replace with more readable gpio methods
     P2DIR |= BIT3 + BIT1;
@@ -66,6 +73,8 @@ int main()
     P1DIR |= BIT3;
     P1SEL |= BIT3 + BIT2 + BIT1;
     P1SEL2 |= BIT3 + BIT2 + BIT1;
+
+    //UCA0CTL1 &= ~UCSWRST;
 
     ir_module_timer::init(msp430hal::timer::TimerMode::up, msp430hal::timer::TimerClockSource::smclk, msp430hal::timer::TimerClockInputDivider::times_1);
     ir_module_timer::setCompareValue<0>(100);
@@ -99,8 +108,10 @@ int main()
 
     uart::enable();
 
+    uart::Usci::enableRxInterrupt();
     __enable_interrupt();
 
+    int i = 0;
     for(;;)
     {
         if (g_comparator_capture_cycle_finished)
@@ -122,15 +133,18 @@ int main()
             timer_1mhz::reset();
         }
 
+        //IFG2 |= UCA0RXIFG;
+
+        ++i;
         if (g_uart_message_to_handle)
         {
-            module_2_status::toggle();
-            char message = *uart::Usci::rx_buf;
+            /*char message = *uart::Usci::rx_buf;
             if (message == 'a')
                 gp_led::set();
             else
                 gp_led::clear();
-
+            */
+            gp_led::toggle();
             g_uart_message_to_handle = false;
         }
 
