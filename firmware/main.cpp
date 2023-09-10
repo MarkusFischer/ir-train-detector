@@ -90,13 +90,13 @@ int main()
     comparator.enableInterrupt();
     comparator.enable();
 
-    StatusManager<6> status_leds;
-    status_leds.bindLED(0, module_1_status::pins_value, module_1_status::out);
-    status_leds.bindLED(1, module_2_status::pins_value, module_2_status::out);
-    status_leds.bindLED(2, module_3_status::pins_value, module_3_status::out);
-    status_leds.bindLED(3, module_4_status::pins_value, module_4_status::out);
-    status_leds.bindLED(4, module_5_status::pins_value, module_5_status::out);
-    status_leds.bindLED(5, module_6_status::pins_value, module_6_status::out);
+    StatusManager status_manager;
+    status_manager.bindLED(0, module_1_status::pins_value, module_1_status::out);
+    status_manager.bindLED(1, module_2_status::pins_value, module_2_status::out);
+    status_manager.bindLED(2, module_3_status::pins_value, module_3_status::out);
+    status_manager.bindLED(3, module_4_status::pins_value, module_4_status::out);
+    status_manager.bindLED(4, module_5_status::pins_value, module_5_status::out);
+    status_manager.bindLED(5, module_6_status::pins_value, module_6_status::out);
 
     uart::enable();
 
@@ -105,7 +105,7 @@ int main()
 
     std::uint8_t configuration_register[16];
 
-    UartHandler<uart::instance_value, 6> uart_handler(configuration_register, &status_leds);
+    UartHandler<uart::instance_value, 6> uart_handler(configuration_register, &status_manager);
 
     int i = 0;
     for(;;)
@@ -115,10 +115,10 @@ int main()
             //Set status led if measured frequency is around 1kHz (+- 5%)
             std::uint16_t capture_value = timer_1mhz::getCaptureValue<1>();
             if (capture_value >= 900 && capture_value <= 1100)
-                status_leds.setBit(0, true);
+                status_manager.setBit(0, true);
                 //module_1_status::set();
             else
-                status_leds.setBit(0, false);
+                status_manager.setBit(0, false);
                 //module_1_status::clear();
 
 
@@ -130,7 +130,7 @@ int main()
         }
 
         uart_handler.update();
-        status_leds.updateLEDs();
+        status_manager.updateLEDs();
     }
     return 0;
 }

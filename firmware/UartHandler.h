@@ -7,7 +7,7 @@
 #include "StatusManager.h"
 
 
-template<int uart_instance, std::size_t size, typename size_t = std::size_t>
+template<int uart_instance>
 class UartHandler
 {
     typedef msp430hal::usci::Usci_t<msp430hal::usci::UsciModule::usci_a, uart_instance> Usci;
@@ -17,7 +17,7 @@ class UartHandler
     std::uint8_t m_receive_config_register = 0;
 
     std::uint8_t* m_configuration_registers;
-    StatusManager<size, size_t>* m_status_manager;
+    StatusManager* m_status_manager;
 
     enum UartCommands : std::uint8_t
     {
@@ -39,7 +39,7 @@ class UartHandler
     };
 
 public:
-    UartHandler(std::uint8_t* configuration_registers, StatusManager<size, size_t>* status_manager);
+    UartHandler(std::uint8_t* configuration_registers, StatusManager* status_manager);
 
     void update();
 };

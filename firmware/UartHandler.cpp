@@ -1,14 +1,13 @@
 #include "UartHandler.h"
 #include "flags.h"
 
-template<int uart_instance, std::size_t size, typename size_t>
-UartHandler<uart_instance, size, size_t>::UartHandler(std::uint8_t* configuration_registers,
-                                                      StatusManager<size, size_t>* status_manager)
+template<int uart_instance>
+UartHandler<uart_instance>::UartHandler(std::uint8_t* configuration_registers, StatusManager* status_manager)
 : m_receive_multibyte_in_progress{false}, m_configuration_registers{configuration_registers}, m_status_manager{status_manager}
 {}
 
-template<int uart_instance, std::size_t size, typename size_t>
-void UartHandler<uart_instance, size, size_t>::update()
+template<int uart_instance>
+void UartHandler<uart_instance>::update()
 {
     if (g_uart_message_to_handle)
     {
