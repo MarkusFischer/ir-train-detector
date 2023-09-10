@@ -26,14 +26,14 @@ We have 6 Channels -> should fit inside 3 Bits
 
 ### Responses
 
-| Response          | B7   | B6   | B5    | B4     | B3     | B2     | B1     | B0     |
-|-------------------|------|------|-------|--------|--------|--------|--------|--------|
-| error             | 0    | 0    | 0     | 0      | 0      | 0      | 0      | 0      |
-| ack               | 0    | 0    | 0     | 1      | DNC    | DNC    | DNC    | DNC    |
-| stat,addr         | 0    | 0    | 1     | 0      | stat   | Addr2  | Addr1  | Addr0  |
-| statall           | 0    | 1    | stat5 | stat4  | stat3  | stat2  | stat1  | stat0  |
-| getconfig,confreg | 1    | 0    | 0     | 0      | Reg3   | Reg2   | Reg1   | Reg0   |
-|                   | V7   | V6   | V5    | V4     | V3     | V2     | V1     | V0     |
+| Response          | B7  | B6  | B5    | B4    | B3    | B2    | B1    | B0    |
+|-------------------|-----|-----|-------|-------|-------|-------|-------|-------|
+| error             | 1   | 1   | 1     | 1     | 1     | 1     | 1     | 1     |
+| ack               | 0   | 0   | 0     | 1     | DNC   | DNC   | DNC   | DNC   |
+| stat,addr         | 0   | 0   | 1     | 0     | stat  | Addr2 | Addr1 | Addr0 |
+| statall           | 0   | 1   | stat5 | stat4 | stat3 | stat2 | stat1 | stat0 |
+| getconfig,confreg | 1   | 0   | 0     | 0     | Reg3  | Reg2  | Reg1  | Reg0  |
+|                   | V7  | V6  | V5    | V4    | V3    | V2    | V1    | V0    |
 
 ### Configuration Register
 

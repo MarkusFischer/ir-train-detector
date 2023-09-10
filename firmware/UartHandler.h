@@ -7,13 +7,14 @@
 #include "StatusManager.h"
 
 
-template<int uart_instance>
+template<typename Uart>
 class UartHandler
 {
-    typedef msp430hal::usci::Usci_t<msp430hal::usci::UsciModule::usci_a, uart_instance> Usci;
-    static constexpr std::uint8_t multibyte_command_bit = 0x80;
+    static const std::uint8_t multibyte_command_bit = 0x80;
 
     bool m_receive_multibyte_in_progress = false;
+    bool m_send_multibyte_in_progress = false;
+    std::uint8_t m_multibyte_payload = 0;
     std::uint8_t m_receive_config_register = 0;
 
     std::uint8_t* m_configuration_registers;

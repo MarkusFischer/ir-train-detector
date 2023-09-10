@@ -105,7 +105,7 @@ int main()
 
     std::uint8_t configuration_register[16];
 
-    UartHandler<uart::instance_value, 6> uart_handler(configuration_register, &status_manager);
+    UartHandler<uart> uart_handler(configuration_register, &status_manager);
 
     int i = 0;
     for(;;)
