@@ -24,5 +24,9 @@ void handleComparatorInterrupt()
 
 void handleUSCIRXInterrupt()
 {
-
+    g_uart_message_to_handle = true;
+    //TODO use hal and circular buffer
+    if (rx_buffer_pointer < 8)
+        rx_buffer[rx_buffer_pointer] = UCA0RXBUF;
+    rx_buffer_pointer++;
 }

@@ -17,6 +17,8 @@
 volatile std::uint_fast8_t g_comparator_counter = 0;
 volatile bool g_comparator_capture_cycle_finished = false;
 volatile bool g_uart_message_to_handle = false;
+volatile std::uint8_t rx_buffer[8];
+volatile std::uint8_t rx_buffer_pointer = 0;
 
 typedef msp430hal::timer::Timer_t<msp430hal::timer::TimerModule::timer_a, 1> ir_module_timer;
 typedef msp430hal::timer::Timer_t<msp430hal::timer::TimerModule::timer_a, 0> timer_1mhz;
@@ -98,9 +100,11 @@ int main()
     status_manager.bindLED(4, module_5_status::pins_value, module_5_status::out);
     status_manager.bindLED(5, module_6_status::pins_value, module_6_status::out);
 
+
     uart::enable();
 
-    uart::Usci::enableRxInterrupt();
+    //uart::Usci::enableRxInterrupt();
+    IE2 |= UCA0RXIE;
     __enable_interrupt();
 
     std::uint8_t configuration_register[16];
@@ -128,6 +132,14 @@ int main()
             timer_1mhz::selectCaptureCompareInput<1>(msp430hal::timer::CaptureCompareInputSelect::gnd);
             timer_1mhz::reset();
         }
+
+        //gp_led::toggle();
+        /*if (g_uart_message_to_handle)
+        {
+            gp_led::toggle();
+            g_uart_message_to_handle = false;
+        }*/
+
 
         uart_handler.update();
         status_manager.updateLEDs();

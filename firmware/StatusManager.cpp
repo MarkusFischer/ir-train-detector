@@ -14,6 +14,7 @@ bool StatusManager::getBit(std::size_t i) const
 {
     if (i < size)
         return m_status & (1 << i);
+    return false;
 }
 
 void StatusManager::setBit(std::size_t i, bool bit)
