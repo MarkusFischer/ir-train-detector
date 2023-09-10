@@ -11,7 +11,8 @@
 
 #include "interrupts.h"
 #include "flags.h"
-#include "StatusLEDManager.h"
+#include "StatusManager.h"
+#include "UartHandler.h"
 
 volatile std::uint_fast8_t g_comparator_counter = 0;
 volatile bool g_comparator_capture_cycle_finished = false;
@@ -55,13 +56,6 @@ int main()
     button::init();
 
     uart::init();
-    //UCA0CTL1 |= UCSWRST;
-    //UCA0CTL1 = UCSSEL_1 | UCSWRST;
-
-    //UCA0BR0 = 3;
-    //UCA0MCTL = 56;
-    //IE2 |= UCA0RXIE;
-
 
 
     //TODO: Replace with more readable gpio methods
@@ -73,8 +67,6 @@ int main()
     P1DIR |= BIT3;
     P1SEL |= BIT3 + BIT2 + BIT1;
     P1SEL2 |= BIT3 + BIT2 + BIT1;
-
-    //UCA0CTL1 &= ~UCSWRST;
 
     ir_module_timer::init(msp430hal::timer::TimerMode::up, msp430hal::timer::TimerClockSource::smclk, msp430hal::timer::TimerClockInputDivider::times_1);
     ir_module_timer::setCompareValue<0>(100);
@@ -98,7 +90,7 @@ int main()
     comparator.enableInterrupt();
     comparator.enable();
 
-    StatusLEDManager<6> status_leds;
+    StatusManager<6> status_leds;
     status_leds.bindLED(0, module_1_status::pins_value, module_1_status::out);
     status_leds.bindLED(1, module_2_status::pins_value, module_2_status::out);
     status_leds.bindLED(2, module_3_status::pins_value, module_3_status::out);
@@ -110,6 +102,10 @@ int main()
 
     uart::Usci::enableRxInterrupt();
     __enable_interrupt();
+
+    std::uint8_t configuration_register[16];
+
+    UartHandler<uart::instance_value, 6> uart_handler(configuration_register, &status_leds);
 
     int i = 0;
     for(;;)
@@ -133,21 +129,7 @@ int main()
             timer_1mhz::reset();
         }
 
-        //IFG2 |= UCA0RXIFG;
-
-        ++i;
-        if (g_uart_message_to_handle)
-        {
-            /*char message = *uart::Usci::rx_buf;
-            if (message == 'a')
-                gp_led::set();
-            else
-                gp_led::clear();
-            */
-            gp_led::toggle();
-            g_uart_message_to_handle = false;
-        }
-
+        uart_handler.update();
         status_leds.updateLEDs();
     }
     return 0;
