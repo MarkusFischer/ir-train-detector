@@ -17,7 +17,7 @@ IF(${CMAKE_CXX_COMPILER_ID} STREQUAL "TI")
     link_directories(/usr/ti/ti-cgt-msp430-21.6.1.lts/lib/)
 ENDIF()
 
-    add_executable(${ELF_FILE} main.cpp interrupts.cpp StatusManager.cpp)
+    add_executable(${ELF_FILE} main.cpp interrupts.cpp StatusManager.cpp RingBufferQueue.h)
     #add_executable(${ELF_FILE} main.cpp)
 IF(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     target_include_directories(${ELF_FILE} PRIVATE include msp430hal/include)

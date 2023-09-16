@@ -49,7 +49,7 @@ We have 6 Channels -> should fit inside 3 Bits
 | 7           | R/W | Channel 3 Config |
 | 8           | R/W | Channel 4 Config |
 | 9           | R/W | Channel 5 Config |
-| 10          | R   | Reserved         |
+| 10          | R/W | Invert Output    |
 | 11          | R   | Reserved         |
 | 12          | R   | Reserved         |
 | 13          | R   | Reserved         |
