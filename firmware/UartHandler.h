@@ -68,14 +68,11 @@ public:
                         response = status_all_response | (m_status_manager->getStatusByte() & 0x3f);
                         break;
                     case status_addr:
-                        std::uint8_t status_addr = message & 0x07;
-                        bool status = m_status_manager->getBit(status_addr);
-                        response = status_addr_response | (status << 3) | status_addr;
+                        response = status_addr_response | (m_status_manager->getBit(status_addr) << 3) | (message & 0x07);
                         break;
                     case getconfig:
-                        std::uint8_t config_register = message & 0x0f;
-                        response = getconfig_response | config_register;
-                        m_multibyte_payload = m_configuration_registers[config_register];
+                        response = getconfig_response | (message & 0x0f);
+                        m_multibyte_payload = m_configuration_registers[message & 0x0f];
                         m_send_multibyte_in_progress = true;
                         break;
                     case configure:
