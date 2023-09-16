@@ -9,15 +9,15 @@ template<typename T, std::size_t size>
 class RingBufferQueue
 {
 private:
-    T m_data[size];
+    volatile T m_data[size];
 
-    std::size_t m_write_index = 0;
-    std::size_t m_read_index = 0;
+    volatile std::size_t m_write_index = 0;
+    volatile std::size_t m_read_index = 0;
 
-    std::size_t m_elements = 0;
+    volatile std::size_t m_elements = 0;
 public:
 
-    void queue(T element)
+    void queue(T element) volatile
     {
         msp430hal::multitasking::InterruptGuard guard;
         if (m_elements < size)
@@ -29,7 +29,7 @@ public:
 
     }
 
-    T dequeue()
+    T dequeue() volatile
     {
         msp430hal::multitasking::InterruptGuard guard;
         if (m_elements > 0)
@@ -41,12 +41,12 @@ public:
 
     }
 
-    bool empty() const
+    bool empty() const volatile
     {
         return m_elements == 0;
     }
 
-    bool hasSpace() const
+    bool hasSpace() const volatile
     {
         return m_elements < size;
     }

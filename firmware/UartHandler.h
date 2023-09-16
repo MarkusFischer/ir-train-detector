@@ -49,11 +49,10 @@ public:
     void update()
     {
         std::uint8_t response = 0;
-        if (g_uart_message_to_handle)
+        if (g_uart_message_received)
         {
             //gp_led::toggle();
-            std::uint8_t message = rx_buffer[0];
-            rx_buffer_pointer = 0;
+            std::uint8_t message = g_rx_buffer.dequeue();
             if (m_receive_multibyte_in_progress)
             {
                 m_configuration_registers[m_receive_config_register] = message;
@@ -92,17 +91,13 @@ public:
 
             if (response != 0)
             {
-                // TODO: Replace with non blocking transmit
-                while (!Uart::Usci::isTxInterruptPending());
-                *Uart::Usci::tx_buf = response;
+                g_tx_buffer.queue(response);
                 if (m_send_multibyte_in_progress)
-                {
-                    while (!Uart::Usci::isTxInterruptPending());
-                    *Uart::Usci::tx_buf = m_multibyte_payload;
-                }
+                    g_tx_buffer.queue(m_multibyte_payload);
             }
 
-            g_uart_message_to_handle = false;
+            if (g_rx_buffer.empty())
+                g_uart_message_received = false;
         }
     }
 };

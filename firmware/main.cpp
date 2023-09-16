@@ -14,11 +14,15 @@
 #include "StatusManager.h"
 #include "UartHandler.h"
 
+#include <msp430hal/cpu/flash_controller.h>
+
 volatile std::uint_fast8_t g_comparator_counter = 0;
 volatile bool g_comparator_capture_cycle_finished = false;
-volatile bool g_uart_message_to_handle = false;
-volatile std::uint8_t rx_buffer[8];
-volatile std::uint8_t rx_buffer_pointer = 0;
+volatile bool g_uart_message_received = false;
+volatile RingBufferQueue<std::uint8_t, 16> g_rx_buffer;
+volatile bool g_uart_transmit_ready = false;
+volatile RingBufferQueue<std::uint8_t, 16> g_tx_buffer;
+
 
 typedef msp430hal::timer::Timer_t<msp430hal::timer::TimerModule::timer_a, 1> ir_module_timer;
 typedef msp430hal::timer::Timer_t<msp430hal::timer::TimerModule::timer_a, 0> timer_1mhz;
@@ -132,16 +136,13 @@ int main()
             timer_1mhz::selectCaptureCompareInput<1>(msp430hal::timer::CaptureCompareInputSelect::gnd);
             timer_1mhz::reset();
         }
-
-        //gp_led::toggle();
-        /*if (g_uart_message_to_handle)
-        {
-            gp_led::toggle();
-            g_uart_message_to_handle = false;
-        }*/
-
-
         uart_handler.update();
+        if (g_uart_transmit_ready && !g_tx_buffer.empty())
+        {
+            g_uart_transmit_ready = false;
+            *uart::Usci::tx_buf = g_tx_buffer.dequeue();
+        }
+
         status_manager.updateLEDs();
     }
     return 0;
