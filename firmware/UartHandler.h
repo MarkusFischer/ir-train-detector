@@ -49,53 +49,50 @@ public:
     void update()
     {
         std::uint8_t response = 0;
-        if (g_uart_message_received)
+        std::uint8_t message = g_rx_buffer.dequeue();
+        //g_tx_buffer.queue(message);
+        if (m_receive_multibyte_in_progress)
         {
-            //gp_led::toggle();
-            std::uint8_t message = g_rx_buffer.dequeue();
-            if (m_receive_multibyte_in_progress)
-            {
-                m_configuration_registers[m_receive_config_register] = message;
-                m_receive_multibyte_in_progress = false;
-            }
-            else
-            {
-                switch(message & 0xf0)
-                {
-                    case reset:
-                        break;
-                    case status_all:
-                        response = status_all_response | (m_status_manager->getStatusByte() & 0x3f);
-                        break;
-                    case status_addr:
-                        response = status_addr_response | (m_status_manager->getBit(status_addr) << 3) | (message & 0x07);
-                        break;
-                    case getconfig:
-                        response = getconfig_response | (message & 0x0f);
-                        m_multibyte_payload = m_configuration_registers[message & 0x0f];
-                        m_send_multibyte_in_progress = true;
-                        break;
-                    case configure:
-                        m_receive_multibyte_in_progress = true;
-                        m_receive_config_register = message & 0x0f;
-                        break;
-                    default: //This case should not happen
-                        response = error;
-                        break;
-                }
-            }
-
-
-            if (response != 0)
-            {
-                g_tx_buffer.queue(response);
-                if (m_send_multibyte_in_progress)
-                    g_tx_buffer.queue(m_multibyte_payload);
-            }
-
-            if (g_rx_buffer.empty())
-                g_uart_message_received = false;
+            m_configuration_registers[m_receive_config_register] = message;
+            m_receive_multibyte_in_progress = false;
         }
+        else
+        {
+            switch(message & 0xf0)
+            {
+                case reset:
+                    break;
+                case status_all:
+                    response = status_all_response | (m_status_manager->getStatusByte() & 0x3f);
+                    gp_led::toggle();
+                    break;
+                case status_addr:
+                    response = status_addr_response | (m_status_manager->getBit(status_addr) << 3) | (message & 0x07);
+                    break;
+                case getconfig:
+                    response = getconfig_response | (message & 0x0f);
+                    m_multibyte_payload = m_configuration_registers[message & 0x0f];
+                    m_send_multibyte_in_progress = true;
+                    break;
+                case configure:
+                    m_receive_multibyte_in_progress = true;
+                    m_receive_config_register = message & 0x0f;
+                    break;
+                default: //This case should not happen
+                    response = error;
+                    break;
+            }
+        }
+
+        if (response != 0)
+        {
+            g_tx_buffer.queue(response);
+            if (m_send_multibyte_in_progress)
+                g_tx_buffer.queue(m_multibyte_payload);
+        }
+
+        if (g_rx_buffer.empty())
+            g_uart_message_received = false;
     }
 };
 

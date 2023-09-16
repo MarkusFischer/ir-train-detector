@@ -5,6 +5,8 @@
 #include <msp430.h>
 #include <msp430hal/multitasking/interrupt_guard.h>
 
+typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_5> gp_led;
+
 template<typename T, std::size_t size>
 class RingBufferQueue
 {
@@ -35,8 +37,9 @@ public:
         if (m_elements > 0)
         {
             m_elements--;
+            std::uint8_t data = m_data[m_read_index];
             m_read_index = (m_read_index + 1) % size;
-            return m_data[m_read_index];
+            return data;
         }
 
     }

@@ -54,5 +54,4 @@ We have 6 Channels -> should fit inside 3 Bits
 | 12          | R   | Reserved         |
 | 13          | R   | Reserved         |
 | 14          | R   | Reserved         |
-| 15          | R   | Reserved         |
 

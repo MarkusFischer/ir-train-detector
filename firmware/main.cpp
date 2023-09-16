@@ -107,8 +107,10 @@ int main()
 
     uart::enable();
 
-    //uart::Usci::enableRxInterrupt();
-    IE2 |= UCA0RXIE;
+    //uart::Usci::enableInterrupts();
+    uart::Usci::enableRxInterrupt();
+    //uart::Usci::enableTxInterrupt();
+    //IE2 |= UCA0RXIE;
     __enable_interrupt();
 
     std::uint8_t configuration_register[16];
@@ -136,10 +138,14 @@ int main()
             timer_1mhz::selectCaptureCompareInput<1>(msp430hal::timer::CaptureCompareInputSelect::gnd);
             timer_1mhz::reset();
         }
-        uart_handler.update();
-        if (g_uart_transmit_ready && !g_tx_buffer.empty())
+        if (g_uart_message_received)
         {
-            g_uart_transmit_ready = false;
+            uart_handler.update();
+        }
+
+        if (uart::Usci::isTxInterruptPending() && !g_tx_buffer.empty())
+        {
+            gp_led::toggle();
             *uart::Usci::tx_buf = g_tx_buffer.dequeue();
         }
 
