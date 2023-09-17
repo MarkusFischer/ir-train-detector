@@ -139,15 +139,11 @@ int main()
             timer_1mhz::reset();
         }
         if (g_uart_message_received)
-        {
             uart_handler.update();
-        }
 
         if (uart::Usci::isTxInterruptPending() && !g_tx_buffer.empty())
-        {
-            gp_led::toggle();
             *uart::Usci::tx_buf = g_tx_buffer.dequeue();
-        }
+
 
         status_manager.updateLEDs();
     }
