@@ -52,6 +52,8 @@ int main()
 
     RAMMirroredFlashConfigurationStorage<15> configuration_storage;
     configuration_storage.reloadFromFlash();
+    configuration_storage.setWriteProtection(1);
+    configuration_storage.setWriteProtection(2);
 
     module_1_status::init();
     module_2_status::init();

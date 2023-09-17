@@ -40,8 +40,8 @@ We have 6 Channels -> should fit inside 3 Bits
 | Register Nr | R/W | Description      |
 |-------------|-----|------------------|
 | 0           | R   | Reserved         | 0x1001
-| 1           | R   | Software version | 0x1002
-| 2           | R   | Hardware version | 0x1003
+| 1           | R   | Hardware version | 0x1002
+| 2           | R   | Software version | 0x1003
 | 3           | R   | Reserved         | 0x1004
 | 4           | R/W | Channel 0 Config |
 | 5           | R/W | Channel 1 Config |

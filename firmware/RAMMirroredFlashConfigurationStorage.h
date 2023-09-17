@@ -15,7 +15,9 @@ private:
     static constexpr std::size_t info_segment_count = (data_size + 1) / 64;
     static constexpr std::size_t redundancy_factor = 64 / (data_size + 1);
 
+    std::uint8_t m_write_protection_flags[(size / 8) + 1];
     std::uint8_t m_data_ram[size];
+
     bool m_synced;
     std::size_t inter_segment_offset = 0;
 public:
@@ -76,11 +78,24 @@ public:
 
     bool valueWriteProtected(std::size_t index) const
     {
-        return false;
+        return (m_write_protection_flags[index / 8] & (1 << index % 8)) != 0;
+    }
+
+    void clearWriteProtection(std::size_t index)
+    {
+        m_write_protection_flags[index / 8] &= ~ (1 << index % 8);
+    }
+
+    void setWriteProtection(std::size_t index)
+    {
+        m_write_protection_flags[index / 8] |= (1 << index % 8);
     }
 
     void set(std::size_t index, std::uint8_t value)
     {
+        if (valueWriteProtected(index))
+            return;
+
         m_data_ram[index] = value;
         m_synced = false;
     }
