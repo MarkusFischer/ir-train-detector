@@ -6,6 +6,7 @@
 #include <msp430hal/gpio/pin.h>
 
 #include "StatusManager.h"
+#include "RAMMirroredFlashConfigurationStorage.h"
 
 typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_5> gp_led;
 
@@ -19,7 +20,7 @@ class UartHandler
     std::uint8_t m_multibyte_payload = 0;
     std::uint8_t m_receive_config_register = 0;
 
-    std::uint8_t* m_configuration_registers;
+    RAMMirroredFlashConfigurationStorage<15>* m_configuration_registers;
     StatusManager* m_status_manager;
 
     enum UartCommands : std::uint8_t
@@ -42,7 +43,7 @@ class UartHandler
     };
 
 public:
-    UartHandler(std::uint8_t* configuration_registers, StatusManager* status_manager)
+    UartHandler(RAMMirroredFlashConfigurationStorage<15>* configuration_registers, StatusManager* status_manager)
     : m_receive_multibyte_in_progress{false}, m_configuration_registers{configuration_registers}, m_status_manager{status_manager}
     {}
 
@@ -53,7 +54,7 @@ public:
         //g_tx_buffer.queue(message);
         if (m_receive_multibyte_in_progress)
         {
-            m_configuration_registers[m_receive_config_register] = message;
+            m_configuration_registers->set(m_receive_config_register, message);
             m_receive_multibyte_in_progress = false;
         }
         else
@@ -64,14 +65,13 @@ public:
                     break;
                 case status_all:
                     response = status_all_response | (m_status_manager->getStatusByte() & 0x3f);
-                    gp_led::toggle();
                     break;
                 case status_addr:
                     response = status_addr_response | (m_status_manager->getBit(status_addr) << 3) | (message & 0x07);
                     break;
                 case getconfig:
                     response = getconfig_response | (message & 0x0f);
-                    m_multibyte_payload = m_configuration_registers[message & 0x0f];
+                    m_multibyte_payload = m_configuration_registers->get((message & 0x0f));
                     m_send_multibyte_in_progress = true;
                     break;
                 case configure:

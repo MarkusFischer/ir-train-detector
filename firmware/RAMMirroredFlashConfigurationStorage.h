@@ -73,13 +73,13 @@ public:
         return false;
     }
 
-    void set(std::size_t index, T value)
+    void set(std::size_t index, std::uint8_t value)
     {
         m_data_ram[index] = value;
         m_synced = false;
     }
 
-    T get(std::size_t index)
+    std::uint8_t get(std::size_t index)
     {
         return m_data_ram[index];
     }

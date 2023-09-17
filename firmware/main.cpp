@@ -13,6 +13,7 @@
 #include "flags.h"
 #include "StatusManager.h"
 #include "UartHandler.h"
+#include "RAMMirroredFlashConfigurationStorage.h"
 
 #include <msp430hal/cpu/flash_controller.h>
 
@@ -49,6 +50,9 @@ int main()
     msp430hal::cpu::selectClockSource<msp430hal::cpu::Clock::smclk>(msp430hal::cpu::ClockSource::dcoclk);
     msp430hal::cpu::setInputDivider<msp430hal::cpu::Clock::smclk>(msp430hal::cpu::Divider::times_8);
 
+
+    RAMMirroredFlashConfigurationStorage<15> configuration_storage;
+    configuration_storage.reloadFromFlash();
 
     module_1_status::init();
     module_2_status::init();
@@ -113,9 +117,9 @@ int main()
     //IE2 |= UCA0RXIE;
     __enable_interrupt();
 
-    std::uint8_t configuration_register[16];
 
-    UartHandler<uart> uart_handler(configuration_register, &status_manager);
+
+    UartHandler<uart> uart_handler(&configuration_storage, &status_manager);
 
     int i = 0;
     for(;;)
@@ -144,6 +148,12 @@ int main()
         if (uart::Usci::isTxInterruptPending() && !g_tx_buffer.empty())
             *uart::Usci::tx_buf = g_tx_buffer.dequeue();
 
+        if (!configuration_storage.synchronized())
+        {
+            gp_led::set();
+            configuration_storage.writeToFlash();
+            gp_led::clear();
+        }
 
         status_manager.updateLEDs();
     }
