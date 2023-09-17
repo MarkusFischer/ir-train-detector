@@ -40,6 +40,7 @@ public:
             m_data_ram[i] = *(flash_pointer + i);
         }
         m_synced = true;
+        return true;
     }
 
     bool writeToFlash()
@@ -52,15 +53,20 @@ public:
             msp430hal::cpu::eraseSegment(segment_start_address);
             inter_segment_offset = 0;
         }
+        else
+        {
+            inter_segment_offset++;
+        }
 
         //(3) Copy data to flash
         if (size % 2)
-            msp430hal::cpu::writeByte(segment_start_address + 1, m_data_ram[0]);
+            msp430hal::cpu::writeByte(segment_start_address + inter_segment_offset * (data_size + 1) + 1, m_data_ram[0]);
         for (std::size_t i = size % 2; i < size; i = i + 2)
         {
-            msp430hal::cpu::writeWord(segment_start_address + i + 1, (m_data_ram[i] << 8) | m_data_ram[i + 1]);
+            msp430hal::cpu::writeWord(segment_start_address + inter_segment_offset * (data_size + 1) + i + 1, ((m_data_ram[i + 1] << 8) | m_data_ram[i]));
         }
         m_synced = true;
+        return true;
     }
 
     bool synchronized() const

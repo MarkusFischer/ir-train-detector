@@ -24,7 +24,6 @@ volatile RingBufferQueue<std::uint8_t, 16> g_rx_buffer;
 volatile bool g_uart_transmit_ready = false;
 volatile RingBufferQueue<std::uint8_t, 16> g_tx_buffer;
 
-
 typedef msp430hal::timer::Timer_t<msp430hal::timer::TimerModule::timer_a, 1> ir_module_timer;
 typedef msp430hal::timer::Timer_t<msp430hal::timer::TimerModule::timer_a, 0> timer_1mhz;
 typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_2, msp430hal::gpio::Pin::p_0> module_1_status;
@@ -111,13 +110,8 @@ int main()
 
     uart::enable();
 
-    //uart::Usci::enableInterrupts();
     uart::Usci::enableRxInterrupt();
-    //uart::Usci::enableTxInterrupt();
-    //IE2 |= UCA0RXIE;
     __enable_interrupt();
-
-
 
     UartHandler<uart> uart_handler(&configuration_storage, &status_manager);
 
