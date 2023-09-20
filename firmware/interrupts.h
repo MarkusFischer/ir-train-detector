@@ -4,6 +4,8 @@
 
 __attribute__((interrupt(TIMER0_A1_VECTOR))) void handleTimer0A1Interrupts();
 
+__attribute__((interrupt(TIMER0_A0_VECTOR))) void handleTimer0A0Interrupt();
+
 __attribute__((interrupt(COMPARATORA_VECTOR))) void handleComparatorInterrupt();
 
 __attribute__((interrupt(USCIAB0RX_VECTOR))) void handleUSCIRXInterrupt();

@@ -6,7 +6,8 @@
 
 //Global variables (used for communication with isr)
 extern volatile std::uint_fast8_t g_comparator_counter;
-extern volatile bool g_comparator_capture_cycle_finished;
+extern volatile std::uint16_t g_comparator_cycle_timer_count;
+extern volatile bool g_capture_cycle_finished;
 extern volatile bool g_uart_message_received;
 extern volatile RingBufferQueue<std::uint8_t, 16> g_rx_buffer;
 extern volatile bool g_uart_transmit_ready;

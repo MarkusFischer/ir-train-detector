@@ -1,5 +1,11 @@
 #include "StatusManager.h"
 
+StatusManager::StatusManager()
+{
+    m_status = 0;
+    m_updated = true;
+}
+
 std::uint8_t& StatusManager::getStatusByte()
 {
     return m_status;
@@ -64,3 +70,4 @@ void StatusManager::updateLEDs()
     }
     m_updated = false;
 }
+

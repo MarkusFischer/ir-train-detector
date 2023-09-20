@@ -23,6 +23,8 @@ private:
 
 public:
 
+    StatusManager();
+
     std::uint8_t& getStatusByte();
     const std::uint8_t& getStatusByte() const;
     bool getBit(std::size_t i) const;
