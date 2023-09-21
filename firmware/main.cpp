@@ -143,11 +143,13 @@ int main()
     {
         if (g_capture_cycle_finished)
         {
-            if (g_comparator_counter >= 95 && g_comparator_counter <= 105)
-                status_manager.setBit(current_channel, true);
-            else
-                status_manager.setBit(current_channel, false);
-
+            if (!(configuration_storage.get(11) & (1 << current_channel)))
+            {
+                if (g_comparator_counter >= 95 && g_comparator_counter <= 105)
+                    status_manager.setBit(current_channel, true);
+                else
+                    status_manager.setBit(current_channel, false);
+            }
             comparator.disableInterrupt();
 
             //Switch channel

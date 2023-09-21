@@ -1,10 +1,8 @@
 #include "StatusManager.h"
 
-StatusManager::StatusManager()
-{
-    m_status = 0;
-    m_updated = true;
-}
+StatusManager::StatusManager(RAMMirroredFlashConfigurationStorage<15>* configuration_registers)
+: m_status{0}, m_updated{true}, m_configuration_registers{configuration_registers}
+{}
 
 std::uint8_t& StatusManager::getStatusByte()
 {
@@ -62,7 +60,7 @@ void StatusManager::updateLEDs()
         {
             if (m_led_binds[i].m_out_register == nullptr)
                 continue;
-            if (getBit(i))
+            if (getBit(i) || (m_configuration_registers->get(10) & (1 << i)))
                 *m_led_binds[i].m_out_register |= m_led_binds[i].m_bit;
             else
                 *m_led_binds[i].m_out_register &= ~m_led_binds[i].m_bit;

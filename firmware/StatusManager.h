@@ -4,6 +4,7 @@
 #include <cstdint>
 
 #include <msp430hal/gpio/pin.h>
+#include "RAMMirroredFlashConfigurationStorage.h"
 
 class StatusManager
 {
@@ -21,9 +22,11 @@ private:
     std::uint8_t m_status;
     bool m_updated;
 
+    RAMMirroredFlashConfigurationStorage<15>* m_configuration_registers;
+
 public:
 
-    StatusManager();
+    StatusManager(RAMMirroredFlashConfigurationStorage<15>* configuration_registers);
 
     std::uint8_t& getStatusByte();
     const std::uint8_t& getStatusByte() const;

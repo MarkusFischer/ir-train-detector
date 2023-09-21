@@ -50,7 +50,7 @@ We have 6 Channels -> should fit inside 3 Bits
 | 8           | R/W | Channel 4 Config |
 | 9           | R/W | Channel 5 Config |
 | 10          | R/W | Invert Output    |
-| 11          | R   | Reserved         |
+| 11          | R/W | Disable Channel  |
 | 12          | R   | Reserved         |
 | 13          | R   | Reserved         |
 | 14          | R   | Reserved         |
