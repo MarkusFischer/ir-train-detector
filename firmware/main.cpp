@@ -82,11 +82,9 @@ int main()
 
 
 
-    //TODO: Replace with more readable gpio methods
     port2_timer_out::init(msp430hal::gpio::PinFunction::primary_peripheral);
     port3_timer_out::init(msp430hal::gpio::PinFunction::primary_peripheral);
-    //P2DIR |= BIT3;
-    //P2OUT &= ~BIT3;
+
 
     uart_pins::init(msp430hal::gpio::PinFunction::secondary_peripheral);
 
@@ -101,29 +99,31 @@ int main()
     gate_timer::setCompareValue<0>(gate_cycle_value);
     gate_timer::compareMode<0>();
     gate_timer::enableCaptureCompareInterrupt<0>();
-    /*
-    gate_timer::captureMode<1>();
-    gate_timer::setCaptureMode<1>(msp430hal::timer::TimerCaptureMode::rising_edge);
-    gate_timer::selectCaptureCompareInput<1>(msp430hal::timer::CaptureCompareInputSelect::gnd);
-    gate_timer::enableCaptureCompareInterrupt<1>();
-    */
+
 
     //Configure Comparator
     msp430hal::peripherals::Comparator comparator;
 
-    msp430hal::peripherals::ComparatorInput comparator_inputs[6] = {msp430hal::peripherals::ComparatorInput::ca_5,
+    const msp430hal::peripherals::ComparatorInput comparator_inputs[6] = {msp430hal::peripherals::ComparatorInput::ca_5,
                                                                     msp430hal::peripherals::ComparatorInput::ca_3,
                                                                     msp430hal::peripherals::ComparatorInput::ca_4,
                                                                     msp430hal::peripherals::ComparatorInput::ca_0,
                                                                     msp430hal::peripherals::ComparatorInput::ca_7,
                                                                     msp430hal::peripherals::ComparatorInput::ca_6};
 
+    P1DIR |= BIT3;
+    P1SEL |= BIT3;
+    P1SEL2 |= BIT3;
+
+    std::size_t current_channel = 3;
     comparator.setNonInvertingInput(msp430hal::peripherals::ComparatorInput::vcc_025);
-    comparator.setInvertingInput(msp430hal::peripherals::ComparatorInput::ca_5);
+    comparator.setInvertingInput(comparator_inputs[current_channel]);
     comparator.enableOutputFilter();
     comparator.enableInterrupt();
     comparator.enable();
 
+    //CACTL2 = P2CA0 | CAF;
+    //CACTL1 = CAREF_1 | CAON | CAIE;
     StatusManager status_manager;
     status_manager.bindLED(0, module_1_status::pins_value, module_1_status::out);
     status_manager.bindLED(1, module_2_status::pins_value, module_2_status::out);
@@ -142,27 +142,38 @@ int main()
 
     UartHandler<uart> uart_handler(&configuration_storage, &status_manager);
 
-    std::uint16_t current_channel = 0;
+
     for(;;)
     {
         if (g_capture_cycle_finished)
         {
-            if (g_comparator_counter >= 9 && g_comparator_counter <= 11)
+            if (g_comparator_counter >= 95 && g_comparator_counter <= 105)
                 status_manager.setBit(current_channel, true);
             else
                 status_manager.setBit(current_channel, false);
 
             comparator.disableInterrupt();
-            //reset counter
-            g_comparator_counter = 0;
-            g_capture_cycle_finished = false;
 
             //Switch channel
             current_channel = (current_channel + 1) % 6;
 
-            if (current_channel == 4)
-                current_channel++;
-            comparator.setNonInvertingInput(comparator_inputs[current_channel]);
+            if (current_channel == 3)
+            {
+                comparator.setNonInvertingInput(comparator_inputs[current_channel]);
+                comparator.setInvertingInput(msp430hal::peripherals::ComparatorInput::vcc_025);
+            }
+            else
+            {
+                comparator.setInvertingInput(comparator_inputs[current_channel]);
+                comparator.setNonInvertingInput(msp430hal::peripherals::ComparatorInput::vcc_025);
+            }
+            //comparator.setInvertingInput(comparator_inputs[current_channel]);
+
+            //reset counter
+            g_comparator_counter = 0;
+            g_capture_cycle_finished = false;
+
+
             gp_led::toggle();
             comparator.enableInterrupt();
             gate_timer::setCompareValue<0>(gate_cycle_value);
