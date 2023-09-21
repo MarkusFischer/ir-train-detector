@@ -111,11 +111,7 @@ int main()
                                                                     msp430hal::peripherals::ComparatorInput::ca_7,
                                                                     msp430hal::peripherals::ComparatorInput::ca_6};
 
-    P1DIR |= BIT3;
-    P1SEL |= BIT3;
-    P1SEL2 |= BIT3;
-
-    std::size_t current_channel = 3;
+    std::size_t current_channel = 0;
     comparator.setNonInvertingInput(msp430hal::peripherals::ComparatorInput::vcc_025);
     comparator.setInvertingInput(comparator_inputs[current_channel]);
     comparator.enableOutputFilter();
@@ -159,8 +155,8 @@ int main()
 
             if (current_channel == 3)
             {
-                comparator.setNonInvertingInput(comparator_inputs[current_channel]);
                 comparator.setInvertingInput(msp430hal::peripherals::ComparatorInput::vcc_025);
+                comparator.setNonInvertingInput(comparator_inputs[current_channel]);
             }
             else
             {
