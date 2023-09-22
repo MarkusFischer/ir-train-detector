@@ -61,11 +61,11 @@ int main()
 
 
     // Load user configuration and activate write protection for some values
-    RAMMirroredFlashConfigurationStorage<15> configuration_storage;
+    /*RAMMirroredFlashConfigurationStorage<15> configuration_storage;
     configuration_storage.reloadFromFlash();
     configuration_storage.setWriteProtection(1);
     configuration_storage.setWriteProtection(2);
-
+    */
     //Initialize module status leds
     module_1_status::init();
     module_2_status::init();
@@ -82,11 +82,12 @@ int main()
 
 
 
-    port2_timer_out::init(msp430hal::gpio::PinFunction::primary_peripheral);
+    /*port2_timer_out::init(msp430hal::gpio::PinFunction::primary_peripheral);
     port3_timer_out::init(msp430hal::gpio::PinFunction::primary_peripheral);
 
 
-    uart_pins::init(msp430hal::gpio::PinFunction::secondary_peripheral);
+    //
+
 
     ir_module_timer::init(msp430hal::timer::TimerMode::up, msp430hal::timer::TimerClockSource::smclk, msp430hal::timer::TimerClockInputDivider::times_1);
     ir_module_timer::setCompareValue<0>(100);
@@ -120,35 +121,43 @@ int main()
 
     //CACTL2 = P2CA0 | CAF;
     //CACTL1 = CAREF_1 | CAON | CAIE;
-    StatusManager status_manager;
+    StatusManager status_manager(&configuration_storage);
     status_manager.bindLED(0, module_1_status::pins_value, module_1_status::out);
     status_manager.bindLED(1, module_2_status::pins_value, module_2_status::out);
     status_manager.bindLED(2, module_3_status::pins_value, module_3_status::out);
     status_manager.bindLED(3, module_4_status::pins_value, module_4_status::out);
     status_manager.bindLED(4, module_5_status::pins_value, module_5_status::out);
     status_manager.bindLED(5, module_6_status::pins_value, module_6_status::out);
-
+    */
 
     // Initialize UART
+    uart_pins::init(msp430hal::gpio::PinFunction::secondary_peripheral);
     uart::init();
     uart::Usci::enableRxInterrupt();
     uart::enable();
 
     __enable_interrupt();
 
-    UartHandler<uart> uart_handler(&configuration_storage, &status_manager);
+    //UartHandler<uart> uart_handler(&configuration_storage, &status_manager);
 
 
     for(;;)
     {
-        if (g_capture_cycle_finished)
+        /*if (g_capture_cycle_finished)
         {
-            if (!(configuration_storage.get(11) & (1 << current_channel)))
+            //if (!(configuration_storage.get(11) & (1 << current_channel)))
             {
                 if (g_comparator_counter >= 95 && g_comparator_counter <= 105)
+                {
                     status_manager.setBit(current_channel, true);
+                    //status_manager.setBits(configuration_storage.get(4 + current_channel) | (1 << current_channel));
+                }
                 else
+                {
                     status_manager.setBit(current_channel, false);
+                    //status_manager.clearBits(configuration_storage.get(4 + current_channel) | (1 << current_channel));
+                }
+
             }
             comparator.disableInterrupt();
 
@@ -172,25 +181,28 @@ int main()
             g_capture_cycle_finished = false;
 
 
-            gp_led::toggle();
+            //gp_led::toggle();
             comparator.enableInterrupt();
             gate_timer::setCompareValue<0>(gate_cycle_value);
-        }
+        }*/
 
         if (g_uart_message_received)
-            uart_handler.update();
+        {
+            //uart_handler.update();
+        }
 
-        if (uart::Usci::isTxInterruptPending() && !g_tx_buffer.empty())
+
+        /*if (uart::Usci::isTxInterruptPending() && !g_tx_buffer.empty())
             *uart::Usci::tx_buf = g_tx_buffer.dequeue();
 
         if (!configuration_storage.synchronized())
         {
-            gp_led::set();
+            //gp_led::set();
             configuration_storage.writeToFlash();
-            gp_led::clear();
-        }
+            //gp_led::clear();
+        }*/
 
-        status_manager.updateLEDs();
+        //status_manager.updateLEDs();
     }
     return 0;
 }

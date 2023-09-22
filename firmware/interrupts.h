@@ -9,6 +9,6 @@ __attribute__((interrupt(TIMER0_A0_VECTOR))) void handleTimer0A0Interrupt();
 __attribute__((interrupt(COMPARATORA_VECTOR))) void handleComparatorInterrupt();
 
 __attribute__((interrupt(USCIAB0RX_VECTOR))) void handleUSCIRXInterrupt();
-__attribute__((interrupt(USCIAB0TX_VECTOR))) void handleUSCIRXInterrupt();
+
 
 #endif //IR_TRAIN_DETECTOR_INTERRUPTS_H

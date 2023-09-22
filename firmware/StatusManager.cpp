@@ -33,6 +33,18 @@ void StatusManager::setBit(std::size_t i, bool bit)
     }
 }
 
+void StatusManager::setBits(std::uint8_t bits)
+{
+    m_status |= bits;
+    m_updated = true;
+}
+
+void StatusManager::clearBits(std::uint8_t bits)
+{
+    m_status &= ~bits;
+    m_updated = true;
+}
+
 template<msp430hal::gpio::Port port>
 void StatusManager::bindLED(std::size_t i, msp430hal::gpio::Pin pin)
 {

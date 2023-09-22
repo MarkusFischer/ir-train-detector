@@ -33,6 +33,9 @@ public:
     bool getBit(std::size_t i) const;
     void setBit(std::size_t i, bool bit);
 
+    void setBits(std::uint8_t bits);
+    void clearBits(std::uint8_t bits);
+
     template<msp430hal::gpio::Port port>
     void bindLED(std::size_t i, msp430hal::gpio::Pin pin);
     void bindLED(std::size_t i, std::size_t pin, volatile std::uint8_t* out_register);
