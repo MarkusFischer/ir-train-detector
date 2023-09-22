@@ -72,10 +72,21 @@ void StatusManager::updateLEDs()
         {
             if (m_led_binds[i].m_out_register == nullptr)
                 continue;
-            if (getBit(i) || (m_configuration_registers->get(10) & (1 << i)))
-                *m_led_binds[i].m_out_register |= m_led_binds[i].m_bit;
+            if (m_configuration_registers->get(10) & (1 << i))
+            {
+                if (getBit(i))
+                    *m_led_binds[i].m_out_register &= ~m_led_binds[i].m_bit;
+                else
+                    *m_led_binds[i].m_out_register |= m_led_binds[i].m_bit;
+            }
             else
-                *m_led_binds[i].m_out_register &= ~m_led_binds[i].m_bit;
+            {
+                if (getBit(i))
+                    *m_led_binds[i].m_out_register |= m_led_binds[i].m_bit;
+                else
+                    *m_led_binds[i].m_out_register &= ~m_led_binds[i].m_bit;
+            }
+
         }
     }
     m_updated = false;

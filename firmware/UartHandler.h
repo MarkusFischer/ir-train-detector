@@ -51,21 +51,9 @@ public:
     {
         std::uint8_t response = 0;
         std::uint8_t message = g_rx_buffer.dequeue();
-        //g_tx_buffer.queue(message);
         if (m_receive_multibyte_in_progress)
         {
             m_configuration_registers->set(m_receive_config_register, message);
-            /*if (m_receive_config_register >= 4 && m_receive_config_register <= 9)
-            {
-                auto new_config = message;
-                for (std::uint_fast8_t i = 0, mask = 0; i < 6; i++, mask <<= 1 )
-                {
-                    if (new_config & mask)
-                        m_configuration_registers->set(4 + i, m_configuration_registers->get(4 + i) | (1 << (m_receive_config_register - 4)));
-                    else
-                        m_configuration_registers->set(4 + i, m_configuration_registers->get(4 + i) & ~(1 << (m_receive_config_register - 4)));
-                }
-            }*/
             m_receive_multibyte_in_progress = false;
         }
         else

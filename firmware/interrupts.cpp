@@ -36,9 +36,6 @@ void handleComparatorInterrupt()
 
 void handleUSCIRXInterrupt()
 {
-    typedef msp430hal::gpio::GPIOPins<msp430hal::gpio::Port::port_3, msp430hal::gpio::Pin::p_5> gp_led;
-    gp_led::toggle();
-    auto data = UCA0RXBUF;
-    //g_uart_message_received = true;
-    //g_rx_buffer.queue(UCA0RXBUF);
+    g_uart_message_received = true;
+    g_rx_buffer.queue(UCA0RXBUF);
 }

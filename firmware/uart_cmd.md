@@ -37,21 +37,21 @@ We have 6 Channels -> should fit inside 3 Bits
 
 ### Configuration Register
 
-| Register Nr | R/W | Description      |
-|-------------|-----|------------------|
-| 0           | R   | Reserved         | 0x1001
-| 1           | R   | Hardware version | 0x1002
-| 2           | R   | Software version | 0x1003
-| 3           | R   | Reserved         | 0x1004
-| 4           | R/W | Channel 0 Config |
-| 5           | R/W | Channel 1 Config |
-| 6           | R/W | Channel 2 Config |
-| 7           | R/W | Channel 3 Config |
-| 8           | R/W | Channel 4 Config |
-| 9           | R/W | Channel 5 Config |
-| 10          | R/W | Invert Output    |
-| 11          | R/W | Disable Channel  |
-| 12          | R   | Reserved         |
-| 13          | R   | Reserved         |
-| 14          | R   | Reserved         |
+| Register Nr | R/W | Description                    |
+|-------------|-----|--------------------------------|
+| 0           | R   | Reserved                       | 0x1001
+| 1           | R   | Hardware version               | 0x1002
+| 2           | R   | Software version               | 0x1003
+| 3           | R   | Reserved                       | 0x1004
+| 4           | R/W | Channel 0 Config (unsupported) |
+| 5           | R/W | Channel 1 Config (unsupported) |
+| 6           | R/W | Channel 2 Config (unsupported) |
+| 7           | R/W | Channel 3 Config (unsupported) |
+| 8           | R/W | Channel 4 Config (unsupported) |
+| 9           | R/W | Channel 5 Config (unsupported) |
+| 10          | R/W | Invert Output                  |
+| 11          | R/W | Disable Channel                |
+| 12          | R   | Reserved                       |
+| 13          | R   | Reserved                       |
+| 14          | R   | Reserved                       |
 
