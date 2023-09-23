@@ -5,6 +5,7 @@
 #include <msp430hal/cpu/clock_module.h>
 #include <msp430hal/cpu/flash_controller.h>
 #include <msp430hal/gpio/pin.h>
+#include <msp430hal/gpio/pin_group.h>
 #include <msp430hal/peripherals/comparator.h>
 #include <msp430hal/timer/hwtimer.h>
 #include <msp430hal/timer/watchdog_timer.h>
@@ -80,6 +81,18 @@ int main()
     port2_timer_out::init(msp430hal::gpio::PinFunction::primary_peripheral);
     port3_timer_out::init(msp430hal::gpio::PinFunction::primary_peripheral);
 
+    port2_timer_out::set();
+    port3_timer_out::set();
+
+    msp430hal::gpio::PinGroupElement{msp430hal::gpio::Pin::p_1, msp430hal::gpio::Port::port_2};
+    msp430hal::gpio::PinGroup<6> timer_out_pins({msp430hal::gpio::PinGroupElement{msp430hal::gpio::Pin::p_1, msp430hal::gpio::Port::port_2},
+                                                 msp430hal::gpio::PinGroupElement{msp430hal::gpio::Pin::p_3, msp430hal::gpio::Port::port_3},
+                                                 msp430hal::gpio::PinGroupElement{msp430hal::gpio::Pin::p_4, msp430hal::gpio::Port::port_2},
+                                                 msp430hal::gpio::PinGroupElement{msp430hal::gpio::Pin::p_2, msp430hal::gpio::Port::port_3},
+                                                 msp430hal::gpio::PinGroupElement{msp430hal::gpio::Pin::p_5, msp430hal::gpio::Port::port_2},
+                                                 msp430hal::gpio::PinGroupElement{msp430hal::gpio::Pin::p_2, msp430hal::gpio::Port::port_2}});
+
+
     ir_module_timer::init(msp430hal::timer::TimerMode::up, msp430hal::timer::TimerClockSource::smclk, msp430hal::timer::TimerClockInputDivider::times_1);
     ir_module_timer::setCompareValue<0>(100);
     ir_module_timer::setCompareValue<1>(50);
@@ -135,6 +148,9 @@ int main()
     {
         if (g_capture_cycle_finished)
         {
+            comparator.disableInterrupt();
+
+
             if (!(configuration_storage.get(11) & (1 << current_channel)))
             {
                 if (g_comparator_counter >= 95 && g_comparator_counter <= 105)
@@ -143,10 +159,14 @@ int main()
                     status_manager.setBit(current_channel, false);
             }
 
-            comparator.disableInterrupt();
+            //Disable timer output to save energy
+            timer_out_pins.clear(msp430hal::gpio::RegisterType::sel, current_channel);
 
             //Switch channel
             current_channel = (current_channel + 1) % 6;
+
+            //Activate timer output
+            timer_out_pins.set(msp430hal::gpio::RegisterType::sel, current_channel);
 
             if (current_channel == 3)
             {
