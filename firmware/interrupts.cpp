@@ -5,19 +5,6 @@
 #include "flags.h"
 #include "constants.h"
 
-
-void handleTimer0A1Interrupts()
-{
-    typedef msp430hal::timer::Timer_t<msp430hal::timer::timer_a, 0> timer;
-
-    //comparator counted 100 rising edges -> update flag and let main program handle the remaining tasks
-    if (*timer::tiv == 0x02)
-    {
-        g_capture_cycle_finished = true;
-        g_comparator_cycle_timer_count = timer::getCaptureValue<1>();
-    }
-}
-
 void handleTimer0A0Interrupt()
 {
     typedef msp430hal::timer::Timer_t<msp430hal::timer::timer_a, 0> timer;
@@ -26,16 +13,17 @@ void handleTimer0A0Interrupt()
 
     //Stop the timer
     timer::setCompareValue<0>(0);
+    __low_power_mode_off_on_exit();
 }
 
 void handleComparatorInterrupt()
 {
     g_comparator_counter++;
-
 }
 
 void handleUSCIRXInterrupt()
 {
     g_uart_message_received = true;
     g_rx_buffer.queue(UCA0RXBUF);
+    __low_power_mode_off_on_exit();
 }

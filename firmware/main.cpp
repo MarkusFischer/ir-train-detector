@@ -202,6 +202,9 @@ int main()
         }
 
         status_manager.updateLEDs();
+
+        if (g_tx_buffer.empty())
+            __low_power_mode_1();
     }
     return 0;
 }
